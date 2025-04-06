@@ -7,7 +7,6 @@ import { StartGameDomainDto } from './dto/start-game.domain.dto';
 import { GameQuestion } from './game-questions.entity';
 import { AnswerStatus } from '../../answers/enums/answer-status';
 import { GameResultStatus } from '../enums/game-result-status';
-import { CreateAnswersDto } from '../../answers/dto/create-answer.dto';
 
 @Entity()
 export class Game extends BaseEntity {
