@@ -60,7 +60,7 @@ describe('questions', () => {
       correctAnswers: body.correctAnswers,
       published: false,
       createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      updatedAt: null,
     });
   });
 
@@ -125,6 +125,20 @@ describe('questions', () => {
         questionsTestManager.authPassword,
       )
       .expect(HttpStatus.NO_CONTENT);
+
+    const { body: responseBody } = (await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .auth(
+        questionsTestManager.authUsername,
+        questionsTestManager.authPassword,
+      )
+      .expect(HttpStatus.OK)) as { body: PaginatedViewDto<QuestionViewDto> };
+
+    expect(responseBody.items[0].updatedAt).toEqual(expect.any(String));
+    expect(responseBody.items[0].body).toEqual(newQuestionData.body);
+    expect(responseBody.items[0].correctAnswers).toEqual(
+      newQuestionData.correctAnswers,
+    );
   });
 
   it('should update publish status', async () => {
@@ -138,5 +152,16 @@ describe('questions', () => {
         questionsTestManager.authPassword,
       )
       .expect(HttpStatus.NO_CONTENT);
+
+    const { body: responseBody } = (await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .auth(
+        questionsTestManager.authUsername,
+        questionsTestManager.authPassword,
+      )
+      .expect(HttpStatus.OK)) as { body: PaginatedViewDto<QuestionViewDto> };
+
+    expect(responseBody.items[0].updatedAt).toEqual(expect.any(String));
+    expect(responseBody.items[0].published).toEqual(true);
   });
 });
