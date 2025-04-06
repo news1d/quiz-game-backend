@@ -19,11 +19,13 @@ export class GamePairViewDto {
     dto.id = game.id.toString();
 
     dto.firstPlayerProgress = {
-      answers: game.firstPlayer.answers.map((answer) => ({
-        questionId: answer.questionId.toString(),
-        answerStatus: answer.status,
-        addedAt: answer.createdAt,
-      })),
+      answers: game.firstPlayer.answers
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .map((answer) => ({
+          questionId: answer.questionId.toString(),
+          answerStatus: answer.status,
+          addedAt: answer.createdAt,
+        })),
       player: {
         id: game.firstPlayer.id.toString(),
         login: game.firstPlayer.user.login,
@@ -33,11 +35,13 @@ export class GamePairViewDto {
 
     dto.secondPlayerProgress = game.secondPlayer
       ? {
-          answers: game.secondPlayer.answers.map((answer) => ({
-            questionId: answer.questionId.toString(),
-            answerStatus: answer.status,
-            addedAt: answer.createdAt,
-          })),
+          answers: game.secondPlayer.answers
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            .map((answer) => ({
+              questionId: answer.questionId.toString(),
+              answerStatus: answer.status,
+              addedAt: answer.createdAt,
+            })),
           player: {
             id: game.secondPlayer.id.toString(),
             login: game.secondPlayer.user.login,
