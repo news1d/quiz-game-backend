@@ -114,7 +114,9 @@ describe('games', () => {
         },
         score: 0,
       },
-      questions: expect.arrayContaining([expect.any(String)]),
+      questions: expect.arrayContaining([
+        { id: expect.any(String), body: expect.any(String) },
+      ]),
       status: GameStatus.Active,
       pairCreatedDate: expect.any(String),
       startGameDate: expect.any(String),
@@ -189,7 +191,9 @@ describe('games', () => {
         },
         score: 0,
       },
-      questions: expect.arrayContaining([expect.any(String)]),
+      questions: expect.arrayContaining([
+        { id: expect.any(String), body: expect.any(String) },
+      ]),
       status: GameStatus.Active,
       pairCreatedDate: expect.any(String),
       startGameDate: expect.any(String),
@@ -271,7 +275,9 @@ describe('games', () => {
         },
         score: 0,
       },
-      questions: expect.arrayContaining([expect.any(String)]),
+      questions: expect.arrayContaining([
+        { id: expect.any(String), body: expect.any(String) },
+      ]),
       status: GameStatus.Active,
       pairCreatedDate: expect.any(String),
       startGameDate: expect.any(String),
@@ -296,7 +302,9 @@ describe('games', () => {
         },
         score: 0,
       },
-      questions: expect.arrayContaining([expect.any(String)]),
+      questions: expect.arrayContaining([
+        { id: expect.any(String), body: expect.any(String) },
+      ]),
       status: GameStatus.Active,
       pairCreatedDate: expect.any(String),
       startGameDate: expect.any(String),
@@ -327,11 +335,9 @@ describe('games', () => {
       .auth(accessTokens[1].accessToken, { type: 'bearer' })
       .expect(HttpStatus.OK);
 
-    expect(firstUserGame.questions[0]).toBe(secondUserGame.questions[0]);
-    expect(firstUserGame.questions[1]).toBe(secondUserGame.questions[1]);
-    expect(firstUserGame.questions[2]).toBe(secondUserGame.questions[2]);
-    expect(firstUserGame.questions[3]).toBe(secondUserGame.questions[3]);
-    expect(firstUserGame.questions[4]).toBe(secondUserGame.questions[4]);
+    for (let i = 0; i < 5; i++) {
+      expect(firstUserGame.questions[i]).toEqual(secondUserGame.questions[i]);
+    }
   });
 
   it('should send an answer to question from user', async () => {
