@@ -27,7 +27,7 @@ export class GamePairViewDto {
           addedAt: answer.createdAt,
         })),
       player: {
-        id: game.firstPlayer.id.toString(),
+        id: game.firstPlayer.user.id.toString(),
         login: game.firstPlayer.user.login,
       },
       score: game.firstPlayer.score,
@@ -43,7 +43,7 @@ export class GamePairViewDto {
               addedAt: answer.createdAt,
             })),
           player: {
-            id: game.secondPlayer.id.toString(),
+            id: game.secondPlayer.user.id.toString(),
             login: game.secondPlayer.user.login,
           },
           score: game.secondPlayer.score,
