@@ -1,7 +1,8 @@
 import {
+  BeforeUpdate,
+  Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 export abstract class BaseEntity {
@@ -11,6 +12,12 @@ export abstract class BaseEntity {
   @CreateDateColumn()
   public createdAt: Date;
 
-  @UpdateDateColumn()
-  public updatedAt: Date;
+  @Column({ type: 'timestamp', nullable: true, default: null })
+  public updatedAt: Date | null;
+
+  // Обновление поля updatedAt только при изменении сущности
+  @BeforeUpdate()
+  updateTimestamps() {
+    this.updatedAt = new Date(); // Обновляем updatedAt вручную
+  }
 }
