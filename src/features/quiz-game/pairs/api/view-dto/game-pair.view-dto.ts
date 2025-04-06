@@ -1,12 +1,13 @@
 import { GamePlayerProgressViewDto } from '../../../players/api/view-dto/game-player-progress.view-dto';
 import { GameStatus } from '../../../games/enums/game-status';
 import { Game } from '../../../games/domain/game.entity';
+import { QuestionsInGamePairViewDtoViewDto } from '../../../questions/api/view-dto/quiestions-in-game-pair.view-dto';
 
 export class GamePairViewDto {
   id: string;
   firstPlayerProgress: GamePlayerProgressViewDto;
   secondPlayerProgress: GamePlayerProgressViewDto | null;
-  questions: string[] | null;
+  questions: QuestionsInGamePairViewDtoViewDto[] | null;
   status: GameStatus;
   pairCreatedDate: Date;
   startGameDate: Date | null;
@@ -46,7 +47,10 @@ export class GamePairViewDto {
       : null;
 
     dto.questions = game.questions?.length
-      ? game.questions.map((q) => q.question.body)
+      ? game.questions.map((q) => ({
+          id: q.question.id.toString(),
+          body: q.question.body,
+        }))
       : null;
 
     dto.status = game.gameStatus;
