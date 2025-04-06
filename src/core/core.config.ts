@@ -9,11 +9,6 @@ export class CoreConfig {
   port: number = Number(this.configService.get('PORT'));
 
   @IsNotEmpty({
-    message: 'Set ENV variable MONGO_URI',
-  })
-  mongoURI: string = this.configService.get('MONGO_URI');
-
-  @IsNotEmpty({
     message: 'Set ENV variable DB_HOST',
   })
   dbHost: string = this.configService.get('DB_HOST');
