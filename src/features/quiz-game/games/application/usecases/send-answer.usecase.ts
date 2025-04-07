@@ -1,8 +1,8 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { GamesRepository } from '../../../games/infrastructure/games.repository';
+import { GamesRepository } from '../../infrastructure/games.repository';
 import { AnswerStatus } from '../../../answers/enums/answer-status';
 import { CreateAnswerCommand } from '../../../answers/application/usecases/create-answer.usecase';
-import { FinishGameCommand } from '../../../games/application/usecases/finish-game.usecase';
+import { FinishGameCommand } from './finish-game.usecase';
 
 export class SendAnswerCommand {
   constructor(

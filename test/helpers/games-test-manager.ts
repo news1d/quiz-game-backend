@@ -1,9 +1,10 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { GamePairViewDto } from '../../src/features/quiz-game/pairs/api/view-dto/game-pair.view-dto';
+import { GamePairViewDto } from '../../src/features/quiz-game/games/api/view-dto/game-pair.view-dto';
 import request from 'supertest';
 import { GLOBAL_PREFIX } from '../../src/setup/global-prefix.setup';
 import { GameStatus } from '../../src/features/quiz-game/games/enums/game-status';
 import { AnswerViewDto } from '../../src/features/quiz-game/answers/api/view-dto/answer.view-dto';
+import { MyStatisticViewDto } from '../../src/features/quiz-game/players/api/view-dto/my-statistic.view-dto';
 
 export class GamesTestManager {
   constructor(private app: INestApplication) {}
@@ -52,5 +53,17 @@ export class GamesTestManager {
       .expect(statusCode);
 
     return responseBody;
+  }
+
+  async getUserScoreStatistic(
+    accessToken: string,
+    statusCode: number = HttpStatus.OK,
+  ): Promise<MyStatisticViewDto> {
+    const { body: response } = (await request(this.app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/users/my-statistic`)
+      .auth(accessToken, { type: 'bearer' })
+      .expect(statusCode)) as { body: MyStatisticViewDto };
+
+    return response;
   }
 }

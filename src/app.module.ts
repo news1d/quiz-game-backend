@@ -66,13 +66,13 @@ import { Player } from './features/quiz-game/players/domain/player.entity';
 import { QuizSAController } from './features/quiz-game/questions/api/quiz.sa.controller';
 import { QuestionsRepository } from './features/quiz-game/questions/infrastructure/questions.repository';
 import { QuestionsQueryRepository } from './features/quiz-game/questions/infrastructure/query/questions.query-repository';
-import { ConnectUserToPairUseCase } from './features/quiz-game/pairs/application/usecases/connect-user-to-pair.usecase';
+import { ConnectUserToPairUseCase } from './features/quiz-game/games/application/usecases/connect-user-to-pair.usecase';
 import { PlayersRepository } from './features/quiz-game/players/infrastructure/players.repository';
 import { GameQuestionsRepository } from './features/quiz-game/games/infrastructure/game-questions.repository';
 import { GamesRepository } from './features/quiz-game/games/infrastructure/games.repository';
 import { GamesQueryRepository } from './features/quiz-game/games/infrastructure/query/games.query-repository';
-import { PairsController } from './features/quiz-game/pairs/api/pairs.controller';
-import { SendAnswerUseCase } from './features/quiz-game/pairs/application/usecases/send-answer.usecase';
+import { GamesController } from './features/quiz-game/games/api/games.controller';
+import { SendAnswerUseCase } from './features/quiz-game/games/application/usecases/send-answer.usecase';
 import { AnswersRepository } from './features/quiz-game/answers/infrastructure/answers.repository';
 import { AnswersQueryRepository } from './features/quiz-game/answers/infrastructure/query/answers.query-repository';
 import { CreateAnswerUseCase } from './features/quiz-game/answers/application/usecases/create-answer.usecase';
@@ -81,6 +81,7 @@ import { CreateGameUseCase } from './features/quiz-game/games/application/usecas
 import { CreateGameQuestionsUseCase } from './features/quiz-game/games/application/usecases/create-game-questions.usecase';
 import { StartGameUseCase } from './features/quiz-game/games/application/usecases/start-game.usecase';
 import { FinishGameUseCase } from './features/quiz-game/games/application/usecases/finish-game.usecase';
+import { PlayersQueryRepository } from './features/quiz-game/players/infrastructure/query/players.query-repository';
 
 const userUseCases = [
   CreateUserUseCase,
@@ -187,7 +188,7 @@ const gameUseCases = [
     AuthController,
     SecurityDevicesController,
     QuizSAController,
-    PairsController,
+    GamesController,
   ],
   providers: [
     {
@@ -233,6 +234,7 @@ const gameUseCases = [
     QuestionsRepository,
     QuestionsQueryRepository,
     PlayersRepository,
+    PlayersQueryRepository,
     QuestionsRepository,
     GameQuestionsRepository,
     GamesRepository,

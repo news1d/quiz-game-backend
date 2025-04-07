@@ -1,6 +1,6 @@
 import { GamePlayerProgressViewDto } from '../../../players/api/view-dto/game-player-progress.view-dto';
-import { GameStatus } from '../../../games/enums/game-status';
-import { Game } from '../../../games/domain/game.entity';
+import { GameStatus } from '../../enums/game-status';
+import { Game } from '../../domain/game.entity';
 import { QuestionsInGamePairViewDtoViewDto } from '../../../questions/api/view-dto/quiestions-in-game-pair.view-dto';
 
 export class GamePairViewDto {

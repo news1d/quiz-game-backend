@@ -19,7 +19,7 @@ describe('games', () => {
   let usersTestManager: UsersTestManager;
   let gamesTestManager: GamesTestManager;
 
-  jest.setTimeout(15000);
+  jest.setTimeout(25000);
 
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) => {
@@ -29,7 +29,7 @@ describe('games', () => {
           factory: (jwtConfig: JwtConfig) => {
             return new JwtService({
               secret: jwtConfig.jwtSecret,
-              signOptions: { expiresIn: '15s' },
+              signOptions: { expiresIn: '25s' },
             });
           },
           inject: [JwtConfig],
@@ -542,5 +542,210 @@ describe('games', () => {
     expect(finishedGame.status).toBe(GameStatus.Finished);
     expect(finishedGame.firstPlayerProgress.score).toBe(4);
     expect(finishedGame.secondPlayerProgress.score).toBe(3);
+  });
+
+  it('should return the user score statistics', async () => {
+    await questionsTestManager.createSeveralPublishedQuestions(7);
+    const users = await usersTestManager.createSeveralUsers(3);
+
+    const accessTokens = await Promise.all(
+      users.map((user) => usersTestManager.login(user.login, '123456789')),
+    );
+
+    await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[1].accessToken,
+    );
+
+    for (let i = 0; i < 5; i++) {
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[0].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[1].accessToken,
+      );
+    }
+
+    const firstUserStatistic = await gamesTestManager.getUserScoreStatistic(
+      accessTokens[0].accessToken,
+    );
+
+    expect(firstUserStatistic).toEqual({
+      sumScore: 6,
+      avgScores: 6,
+      gamesCount: 1,
+      winsCount: 1,
+      lossesCount: 0,
+      drawsCount: 0,
+    });
+
+    const secondUserStatistic = await gamesTestManager.getUserScoreStatistic(
+      accessTokens[1].accessToken,
+    );
+
+    expect(secondUserStatistic).toEqual({
+      sumScore: 0,
+      avgScores: 0,
+      gamesCount: 1,
+      winsCount: 0,
+      lossesCount: 1,
+      drawsCount: 0,
+    });
+
+    await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[2].accessToken,
+    );
+
+    // Отвечаем правильно на 3 вопроса
+    for (let i = 0; i < 3; i++) {
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[0].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[2].accessToken,
+      );
+    }
+
+    // Отвечаем неправильно на 2 вопроса
+    for (let i = 0; i < 2; i++) {
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[2].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[0].accessToken,
+      );
+    }
+
+    const updatedFirstUserStatistic =
+      await gamesTestManager.getUserScoreStatistic(accessTokens[0].accessToken);
+
+    expect(updatedFirstUserStatistic).toEqual({
+      sumScore: 9,
+      avgScores: 4.5,
+      gamesCount: 2,
+      winsCount: 1,
+      lossesCount: 1,
+      drawsCount: 0,
+    });
+
+    const thirdUserStatistic = await gamesTestManager.getUserScoreStatistic(
+      accessTokens[2].accessToken,
+    );
+
+    expect(thirdUserStatistic).toEqual({
+      sumScore: 4,
+      avgScores: 4,
+      gamesCount: 1,
+      winsCount: 1,
+      lossesCount: 0,
+      drawsCount: 0,
+    });
+  });
+
+  it('should return all user games', async () => {
+    await questionsTestManager.createSeveralPublishedQuestions(7);
+    const users = await usersTestManager.createSeveralUsers(2);
+
+    const accessTokens = await Promise.all(
+      users.map((user) => usersTestManager.login(user.login, '123456789')),
+    );
+
+    await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[1].accessToken,
+    );
+
+    for (let i = 0; i < 5; i++) {
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[0].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[1].accessToken,
+      );
+    }
+
+    await gamesTestManager.connectUserToPair(accessTokens[0].accessToken);
+
+    const { body: allGamesForFirstUser } = await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my`)
+      .auth(accessTokens[0].accessToken, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    const { body: allGamesForSecondUser } = await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my`)
+      .auth(accessTokens[1].accessToken, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    expect(allGamesForFirstUser.items).toEqual([
+      {
+        id: expect.any(String),
+        firstPlayerProgress: {
+          answers: [],
+          player: {
+            id: expect.any(String),
+            login: expect.any(String),
+          },
+          score: 0,
+        },
+        secondPlayerProgress: null,
+        questions: null,
+        status: GameStatus.PendingSecondPlayer,
+        pairCreatedDate: expect.any(String),
+        startGameDate: null,
+        finishGameDate: null,
+      },
+      {
+        id: expect.any(String),
+        firstPlayerProgress: {
+          answers: expect.arrayContaining([
+            {
+              questionId: expect.any(String),
+              answerStatus: AnswerStatus.Correct,
+              addedAt: expect.any(String),
+            },
+          ]),
+          player: {
+            id: expect.any(String),
+            login: expect.any(String),
+          },
+          score: 6,
+        },
+        secondPlayerProgress: {
+          answers: expect.arrayContaining([
+            {
+              questionId: expect.any(String),
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+          ]),
+          player: {
+            id: expect.any(String),
+            login: expect.any(String),
+          },
+          score: 0,
+        },
+        questions: expect.arrayContaining([
+          { id: expect.any(String), body: expect.any(String) },
+        ]),
+        status: GameStatus.Finished,
+        pairCreatedDate: expect.any(String),
+        startGameDate: expect.any(String),
+        finishGameDate: expect.any(String),
+      },
+    ]);
+
+    expect(allGamesForSecondUser.items.length).toBe(1);
+    expect(allGamesForFirstUser.items[1]).toEqual(
+      allGamesForSecondUser.items[0],
+    );
   });
 });

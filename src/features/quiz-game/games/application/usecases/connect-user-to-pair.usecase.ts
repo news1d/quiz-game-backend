@@ -1,8 +1,8 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { GamesRepository } from '../../../games/infrastructure/games.repository';
+import { GamesRepository } from '../../infrastructure/games.repository';
 import { CreatePlayerCommand } from '../../../players/application/usecases/create-player.usecase';
-import { CreateGameCommand } from '../../../games/application/usecases/create-game.usecase';
-import { StartGameCommand } from '../../../games/application/usecases/start-game.usecase';
+import { CreateGameCommand } from './create-game.usecase';
+import { StartGameCommand } from './start-game.usecase';
 
 export class ConnectUserToPairCommand {
   constructor(public userId: string) {}
