@@ -785,7 +785,9 @@ describe('games', () => {
 
     // Получаем все игры первого пользователя
     const { body: allGamesForUser } = await request(app.getHttpServer())
-      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my?=sortBy=status`)
+      .get(
+        `/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my?sortBy=status&sortDirection=asc`,
+      )
       .auth(accessTokens[0].accessToken, { type: 'bearer' })
       .expect(HttpStatus.OK);
 
@@ -794,10 +796,10 @@ describe('games', () => {
     // Проверка сортировки по полю 'status'
     const sortedStatuses = allGamesForUser.items.map((game) => game.status);
     expect(sortedStatuses).toEqual([
+      GameStatus.Finished,
+      GameStatus.Finished,
+      GameStatus.Finished,
       GameStatus.Active,
-      GameStatus.Finished,
-      GameStatus.Finished,
-      GameStatus.Finished,
     ]);
 
     // Проверка вторичной сортировки по полю 'pairCreatedDate'
