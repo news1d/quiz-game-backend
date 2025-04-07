@@ -10,6 +10,7 @@ import { GamePairViewDto } from '../../api/view-dto/game-pair.view-dto';
 import { GameStatus } from '../../enums/game-status';
 import { GetGamesQueryParams } from '../../api/input-dto/get-games-query-params.input-dto';
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
+import { GamesSortBy } from '../../api/input-dto/games-sort-by';
 
 @Injectable()
 export class GamesQueryRepository {
@@ -24,6 +25,16 @@ export class GamesQueryRepository {
     const sortBy = `game.${query.sortBy}`;
     const sortDirection = query.sortDirection.toUpperCase() as 'ASC' | 'DESC';
 
+    // Если основной критерий сортировки - createdAt, то не нужно его использовать в дополнительной сортировке
+    const orderBy: { [key: string]: 'ASC' | 'DESC' } = {
+      [sortBy]: sortDirection, // основной критерий сортировки
+    };
+
+    // Если основной критерий не createdAt, то добавляем дополнительную сортировку по createdAt
+    if (query.sortBy !== GamesSortBy.pairCreatedDate) {
+      orderBy['game.createdAt'] = 'DESC';
+    }
+
     const [games, totalCount] = await this.gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.firstPlayer', 'firstPlayer')
@@ -37,7 +48,7 @@ export class GamesQueryRepository {
       .where('firstPlayer.userId = :userId OR secondPlayer.userId = :userId', {
         userId: +userId,
       })
-      .orderBy(sortBy, sortDirection)
+      .orderBy(orderBy)
       .skip(query.calculateSkip())
       .take(query.pageSize)
       .getManyAndCount();
