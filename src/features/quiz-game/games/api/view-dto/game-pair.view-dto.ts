@@ -51,10 +51,12 @@ export class GamePairViewDto {
       : null;
 
     dto.questions = game.questions?.length
-      ? game.questions.map((q) => ({
-          id: q.question.id.toString(),
-          body: q.question.body,
-        }))
+      ? game.questions
+          .sort((a, b) => a.order - b.order)
+          .map((q) => ({
+            id: q.question.id.toString(),
+            body: q.question.body,
+          }))
       : null;
 
     dto.status = game.status;
