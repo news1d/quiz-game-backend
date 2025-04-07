@@ -16,7 +16,7 @@ export class GamesRepository {
 
   async getPendingPairGame(): Promise<Game | null> {
     return await this.gamesRepository.findOneBy({
-      gameStatus: GameStatus.PendingSecondPlayer,
+      status: GameStatus.PendingSecondPlayer,
     });
   }
 
@@ -45,11 +45,11 @@ export class GamesRepository {
     const game = await this.gamesRepository.findOne({
       where: [
         {
-          gameStatus: GameStatus.Active,
+          status: GameStatus.Active,
           firstPlayer: { userId: +userId },
         },
         {
-          gameStatus: GameStatus.Active,
+          status: GameStatus.Active,
           secondPlayer: { userId: +userId },
         },
       ],
@@ -89,11 +89,11 @@ export class GamesRepository {
     const game = await this.gamesRepository.findOne({
       where: [
         {
-          gameStatus: In([GameStatus.Active, GameStatus.PendingSecondPlayer]),
+          status: In([GameStatus.Active, GameStatus.PendingSecondPlayer]),
           firstPlayer: { userId: +userId },
         },
         {
-          gameStatus: In([GameStatus.Active, GameStatus.PendingSecondPlayer]),
+          status: In([GameStatus.Active, GameStatus.PendingSecondPlayer]),
           secondPlayer: { userId: +userId },
         },
       ],

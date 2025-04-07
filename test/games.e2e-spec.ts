@@ -794,12 +794,14 @@ describe('games', () => {
     expect(allGamesForUser.items).toHaveLength(4);
 
     // Проверка сортировки по полю 'status'
-    const sortedStatuses = allGamesForUser.items.map((game) => game.status);
+    const sortedStatuses = allGamesForUser.items.map(
+      (game: GamePairViewDto) => game.status,
+    );
     expect(sortedStatuses).toEqual([
-      GameStatus.Finished,
-      GameStatus.Finished,
-      GameStatus.Finished,
       GameStatus.Active,
+      GameStatus.Finished,
+      GameStatus.Finished,
+      GameStatus.Finished,
     ]);
 
     // Проверка вторичной сортировки по полю 'pairCreatedDate'

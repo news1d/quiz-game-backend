@@ -87,11 +87,11 @@ export class GamesQueryRepository {
       where: [
         {
           firstPlayer: { userId: +userId },
-          gameStatus: Not(GameStatus.Finished),
+          status: Not(GameStatus.Finished),
         },
         {
           secondPlayer: { userId: +userId },
-          gameStatus: Not(GameStatus.Finished),
+          status: Not(GameStatus.Finished),
         },
       ],
       relations: {

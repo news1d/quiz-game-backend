@@ -57,10 +57,10 @@ export class GamePairViewDto {
         }))
       : null;
 
-    dto.status = game.gameStatus;
+    dto.status = game.status;
     dto.pairCreatedDate = game.createdAt;
-    dto.startGameDate = game.gameStartedAt;
-    dto.finishGameDate = game.gameFinishedAt;
+    dto.startGameDate = game.startGameDate;
+    dto.finishGameDate = game.finishGameDate;
 
     return dto;
   }

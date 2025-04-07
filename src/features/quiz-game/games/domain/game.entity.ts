@@ -21,13 +21,13 @@ export class Game extends BaseEntity {
     enum: GameStatus,
     default: GameStatus.PendingSecondPlayer,
   })
-  gameStatus: GameStatus;
+  status: GameStatus;
 
   @Column({ type: 'timestamp', nullable: true })
-  gameStartedAt: Date | null;
+  startGameDate: Date | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  gameFinishedAt: Date | null;
+  finishGameDate: Date | null;
 
   @OneToOne(() => Player, { cascade: true })
   @JoinColumn({ name: 'firstPlayerId' })
@@ -51,13 +51,13 @@ export class Game extends BaseEntity {
   startGame(dto: StartGameDomainDto) {
     this.secondPlayerId = +dto.secondPlayerId;
     this.questions = dto.questions;
-    this.gameStatus = GameStatus.Active;
-    this.gameStartedAt = new Date();
+    this.status = GameStatus.Active;
+    this.startGameDate = new Date();
   }
 
   finishGame() {
-    this.gameStatus = GameStatus.Finished;
-    this.gameFinishedAt = new Date();
+    this.status = GameStatus.Finished;
+    this.finishGameDate = new Date();
   }
 
   addBonusScoreToPlayer(): void {

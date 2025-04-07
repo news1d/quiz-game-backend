@@ -30,7 +30,7 @@ export class PlayersQueryRepository {
         'player.id = game.firstPlayerId OR player.id = game.secondPlayerId',
       )
       .where('player.userId = :userId', { userId })
-      .andWhere('game.gameStatus = :status', { status: GameStatus.Finished })
+      .andWhere('game.status = :status', { status: GameStatus.Finished })
       .setParameters({
         win: GameResultStatus.Win,
         lose: GameResultStatus.Lose,
