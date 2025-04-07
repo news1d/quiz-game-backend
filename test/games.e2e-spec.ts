@@ -12,6 +12,7 @@ import { GLOBAL_PREFIX } from '../src/setup/global-prefix.setup';
 import { GameStatus } from '../src/features/quiz-game/games/enums/game-status';
 import { GamesTestManager } from './helpers/games-test-manager';
 import { AnswerStatus } from '../src/features/quiz-game/answers/enums/answer-status';
+import { GamePairViewDto } from '../src/features/quiz-game/games/api/view-dto/game-pair.view-dto';
 
 describe('games', () => {
   let app: INestApplication;
@@ -19,7 +20,7 @@ describe('games', () => {
   let usersTestManager: UsersTestManager;
   let gamesTestManager: GamesTestManager;
 
-  jest.setTimeout(25000);
+  jest.setTimeout(35000);
 
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) => {
@@ -29,7 +30,7 @@ describe('games', () => {
           factory: (jwtConfig: JwtConfig) => {
             return new JwtService({
               secret: jwtConfig.jwtSecret,
-              signOptions: { expiresIn: '25s' },
+              signOptions: { expiresIn: '35s' },
             });
           },
           inject: [JwtConfig],
@@ -747,5 +748,69 @@ describe('games', () => {
     expect(allGamesForFirstUser.items[1]).toEqual(
       allGamesForSecondUser.items[0],
     );
+  });
+
+  it('should return sorted user games by status (finished and current)', async () => {
+    await questionsTestManager.createSeveralPublishedQuestions(7);
+    const users = await usersTestManager.createSeveralUsers(3);
+
+    const accessTokens = await Promise.all(
+      users.map((user) => usersTestManager.login(user.login, '123456789')),
+    );
+
+    // Создаем 3 игры и добавляем ответы последовательно
+    for (let i = 0; i < 3; i++) {
+      await gamesTestManager.startGame(
+        accessTokens[0].accessToken,
+        accessTokens[1].accessToken,
+      );
+
+      for (let j = 0; j < 5; j++) {
+        await gamesTestManager.sendAnswer(
+          'correctAnswer',
+          accessTokens[0].accessToken,
+        );
+        await gamesTestManager.sendAnswer(
+          'wrongAnswer',
+          accessTokens[1].accessToken,
+        );
+      }
+    }
+
+    // Создаем 4 игру
+    await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[2].accessToken,
+    );
+
+    // Получаем все игры первого пользователя
+    const { body: allGamesForUser } = await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my?=sortBy=status`)
+      .auth(accessTokens[0].accessToken, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    expect(allGamesForUser.items).toHaveLength(4);
+
+    // Проверка сортировки по полю 'status'
+    const sortedStatuses = allGamesForUser.items.map((game) => game.status);
+    expect(sortedStatuses).toEqual([
+      GameStatus.Active,
+      GameStatus.Finished,
+      GameStatus.Finished,
+      GameStatus.Finished,
+    ]);
+
+    // Проверка вторичной сортировки по полю 'pairCreatedDate'
+    const sortedPairCreatedDates = allGamesForUser.items.map(
+      (game: GamePairViewDto) => game.pairCreatedDate,
+    );
+    const sortedPairCreatedDatesCorrectly = [...sortedPairCreatedDates].sort(
+      (a, b) => {
+        if (a === b) return 0;
+        return a > b ? -1 : 1;
+      },
+    );
+
+    expect(sortedPairCreatedDates).toEqual(sortedPairCreatedDatesCorrectly);
   });
 });
