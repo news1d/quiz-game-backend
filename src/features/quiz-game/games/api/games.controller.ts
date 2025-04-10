@@ -26,9 +26,9 @@ import { MyStatisticViewDto } from '../../players/api/view-dto/my-statistic.view
 import { PlayersQueryRepository } from '../../players/infrastructure/query/players.query-repository';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { GetGamesQueryParams } from './input-dto/get-games-query-params.input-dto';
+import { GetUsersTopQueryParams } from '../../players/api/input-dto/get-top-users-query-params.input-dto';
+import { UsersTopViewDto } from '../../players/api/view-dto/users-top.view-dto';
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('pair-game-quiz')
 export class GamesController {
   constructor(
@@ -38,6 +38,16 @@ export class GamesController {
     private playersQueryRepository: PlayersQueryRepository,
   ) {}
 
+  @Get('users/top')
+  @HttpCode(HttpStatus.OK)
+  async getUsersTop(
+    @Query() query: GetUsersTopQueryParams,
+  ): Promise<PaginatedViewDto<UsersTopViewDto[]>> {
+    return this.playersQueryRepository.getUsersTop(query);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('pairs/my')
   @HttpCode(HttpStatus.OK)
   async getAllUserGames(
@@ -47,6 +57,8 @@ export class GamesController {
     return this.gamesQueryRepository.getAllUserGames(query, user.id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('users/my-statistic')
   async getUserStatistic(
     @ExtractUserFromRequest() user: UserContextDto,
@@ -54,6 +66,8 @@ export class GamesController {
     return this.playersQueryRepository.getStatisticsByUserId(user.id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('pairs/my-current')
   async getMyCurrentGame(
     @ExtractUserFromRequest() user: UserContextDto,
@@ -63,6 +77,8 @@ export class GamesController {
     );
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiParam({ name: 'id' })
   @Get('pairs/:id')
   @HttpCode(HttpStatus.OK)
@@ -73,6 +89,8 @@ export class GamesController {
     return this.gamesQueryRepository.getGameByIdOrFails(gameId, user.id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('pairs/connection')
   @HttpCode(HttpStatus.OK)
   async connectUserToPair(
@@ -85,6 +103,8 @@ export class GamesController {
     return this.gamesQueryRepository.getGameByIdOrNotFoundFail(gameId);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
   async sendAnswer(

@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 
-class PaginationParams {
+export class PaginationParams {
   @Type(() => Number)
   pageNumber: number = 1;
   @Type(() => Number)

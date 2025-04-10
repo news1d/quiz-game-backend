@@ -817,4 +817,95 @@ describe('games', () => {
 
     expect(sortedPairCreatedDates).toEqual(sortedPairCreatedDatesCorrectly);
   });
+
+  it('should return list of top users', async () => {
+    await questionsTestManager.createSeveralPublishedQuestions(7);
+    const users = await usersTestManager.createSeveralUsers(3);
+
+    const accessTokens = await Promise.all(
+      users.map((user) => usersTestManager.login(user.login, '123456789')),
+    );
+
+    await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[1].accessToken,
+    );
+
+    // Отвечаем правильно на 3 вопроса
+    for (let i = 0; i < 3; i++) {
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[0].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[1].accessToken,
+      );
+    }
+
+    // Отвечаем неправильно на 2 вопроса
+    for (let i = 0; i < 2; i++) {
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[0].accessToken,
+      );
+      await gamesTestManager.sendAnswer(
+        'wrongAnswer',
+        accessTokens[1].accessToken,
+      );
+    }
+
+    // Создаем 2 игру
+    await gamesTestManager.startGame(
+      accessTokens[1].accessToken,
+      accessTokens[2].accessToken,
+    );
+
+    const { body: topUsersList } = await request(app.getHttpServer())
+      .get(
+        `/${GLOBAL_PREFIX}/pair-game-quiz/users/top?sort=winsCount desc&sort=gamesCount asc`,
+      )
+      .expect(HttpStatus.OK);
+
+    expect(topUsersList.items).toHaveLength(3);
+    expect(topUsersList.items).toEqual([
+      {
+        sumScore: 4,
+        avgScores: 4,
+        gamesCount: 1,
+        winsCount: 1,
+        lossesCount: 0,
+        drawsCount: 0,
+        player: {
+          id: expect.any(String),
+          login: expect.any(String),
+        },
+      },
+      {
+        sumScore: 0,
+        avgScores: 0,
+        gamesCount: 1,
+        winsCount: 0,
+        lossesCount: 0,
+        drawsCount: 0,
+        player: {
+          id: expect.any(String),
+          login: expect.any(String),
+        },
+      },
+      {
+        sumScore: 3,
+        avgScores: 1.5,
+        gamesCount: 2,
+        winsCount: 0,
+        lossesCount: 1,
+        drawsCount: 0,
+
+        player: {
+          id: expect.any(String),
+          login: expect.any(String),
+        },
+      },
+    ]);
+  });
 });
