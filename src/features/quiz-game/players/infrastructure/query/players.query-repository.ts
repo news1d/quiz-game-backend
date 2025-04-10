@@ -48,40 +48,41 @@ export class PlayersQueryRepository {
   async getUsersTop(
     query: GetUsersTopQueryParams,
   ): Promise<PaginatedViewDto<UsersTopViewDto[]>> {
-    const orderBy: Record<string, 'ASC' | 'DESC'> = {};
-
-    for (const sortItem of query.sortItems) {
-      orderBy[sortItem.field] = sortItem.direction.toUpperCase() as
-        | 'ASC'
-        | 'DESC';
-    }
-
-    const queryBuilder = this.playersRepository
+    // Создаём подзапрос для выборки пользователей и статистики
+    const subQuery = this.playersRepository
       .createQueryBuilder('player')
       .select([
-        'player.userId AS id',
-        'user.login AS login',
-        'SUM(player.score) AS sumScore',
-        'ROUND(AVG(player.score)::numeric, 2)::float AS avgScores',
-        'COUNT(player.id) AS gamesCount',
-        'SUM(CASE WHEN player.status = :win THEN 1 ELSE 0 END) AS winsCount',
-        'SUM(CASE WHEN player.status = :lose THEN 1 ELSE 0 END) AS lossesCount',
-        'SUM(CASE WHEN player.status = :draw THEN 1 ELSE 0 END) AS drawsCount',
+        'player.userId AS "userId"',
+        'user.login AS "login"',
+        'SUM(player.score) AS "sumScore"',
+        'ROUND(AVG(player.score)::numeric, 2)::float AS "avgScores"',
+        'COUNT(player.id) AS "gamesCount"',
+        'SUM(CASE WHEN player.status = :win THEN 1 ELSE 0 END) AS "winsCount"',
+        'SUM(CASE WHEN player.status = :lose THEN 1 ELSE 0 END) AS "lossesCount"',
+        'SUM(CASE WHEN player.status = :draw THEN 1 ELSE 0 END) AS "drawsCount"',
       ])
       .leftJoin(User, 'user', 'user.id = player.userId')
       .groupBy('player.userId')
       .addGroupBy('user.login')
-      .orderBy(orderBy)
       .setParameters({
         win: GameResultStatus.Win,
         lose: GameResultStatus.Lose,
         draw: GameResultStatus.Draw,
-      })
-      .skip(query.calculateSkip())
-      .take(query.pageSize);
+      });
 
-    // Получение списка пользователей и их статистики
-    const users = await queryBuilder.getRawMany();
+    // Применяем сортировку
+    for (const sortItem of query.sortItems) {
+      subQuery.addOrderBy(
+        `"${sortItem.field}"`,
+        sortItem.direction.toUpperCase() as 'ASC' | 'DESC',
+      );
+    }
+
+    // Получение списка пользователей с пагинацией
+    const users = await subQuery
+      .offset(query.calculateSkip())
+      .limit(query.pageSize)
+      .getRawMany();
 
     // Получение общего количества пользователей
     const totalCount = (

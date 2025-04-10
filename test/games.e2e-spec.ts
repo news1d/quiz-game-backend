@@ -863,11 +863,11 @@ describe('games', () => {
 
     const { body: topUsersList } = await request(app.getHttpServer())
       .get(
-        `/${GLOBAL_PREFIX}/pair-game-quiz/users/top?sort=winsCount desc&sort=gamesCount asc`,
+        `/${GLOBAL_PREFIX}/pair-game-quiz/users/top?pageSize=2&pageNumber=1&sort=winsCount desc&sort=gamesCount asc`,
       )
       .expect(HttpStatus.OK);
 
-    expect(topUsersList.items).toHaveLength(3);
+    expect(topUsersList.items).toHaveLength(2);
     expect(topUsersList.items).toEqual([
       {
         sumScore: 4,
@@ -888,19 +888,6 @@ describe('games', () => {
         winsCount: 0,
         lossesCount: 0,
         drawsCount: 0,
-        player: {
-          id: expect.any(String),
-          login: expect.any(String),
-        },
-      },
-      {
-        sumScore: 3,
-        avgScores: 1.5,
-        gamesCount: 2,
-        winsCount: 0,
-        lossesCount: 1,
-        drawsCount: 0,
-
         player: {
           id: expect.any(String),
           login: expect.any(String),

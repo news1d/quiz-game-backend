@@ -12,14 +12,14 @@ export class UsersTopViewDto {
   static mapToView(raw: any): UsersTopViewDto {
     const dto = new UsersTopViewDto();
 
-    dto.sumScore = Number(raw.sumscore) || 0;
-    dto.avgScores = parseFloat(raw.avgscores || 0);
-    dto.gamesCount = Number(raw.gamescount) || 0;
-    dto.winsCount = Number(raw.winscount) || 0;
-    dto.lossesCount = Number(raw.lossescount) || 0;
-    dto.drawsCount = Number(raw.drawscount) || 0;
+    dto.sumScore = Number(raw.sumScore) || 0;
+    dto.avgScores = parseFloat(raw.avgScores || 0);
+    dto.gamesCount = Number(raw.gamesCount) || 0;
+    dto.winsCount = Number(raw.winsCount) || 0;
+    dto.lossesCount = Number(raw.lossesCount) || 0;
+    dto.drawsCount = Number(raw.drawsCount) || 0;
     dto.player = {
-      id: raw.id.toString(),
+      id: raw.userId.toString(),
       login: raw.login,
     };
 
