@@ -16,6 +16,12 @@ export class Game extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   secondPlayerId: number | null;
 
+  @Column({ type: 'timestamp', nullable: true })
+  firstPlayerCompletedAt: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  secondPlayerCompletedAt: Date | null;
+
   @Column({
     type: 'enum',
     enum: GameStatus,
@@ -127,5 +133,13 @@ export class Game extends BaseEntity {
     if (!player) return;
 
     player.addScore();
+  }
+
+  markPlayerCompleted(userId: string) {
+    if (this.firstPlayer.userId === +userId) {
+      this.firstPlayerCompletedAt = new Date();
+    } else {
+      this.secondPlayerCompletedAt = new Date();
+    }
   }
 }

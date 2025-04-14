@@ -82,6 +82,9 @@ import { CreateGameQuestionsUseCase } from './features/quiz-game/games/applicati
 import { StartGameUseCase } from './features/quiz-game/games/application/usecases/start-game.usecase';
 import { FinishGameUseCase } from './features/quiz-game/games/application/usecases/finish-game.usecase';
 import { PlayersQueryRepository } from './features/quiz-game/players/infrastructure/query/players.query-repository';
+import { ScheduleModule } from '@nestjs/schedule';
+import { GameTimeoutCronService } from './features/quiz-game/games/application/game-timeout-cron.service';
+import { FillMissingAnswersUseCase } from './features/quiz-game/answers/application/usecases/fill-missing-answers.usecase';
 
 const userUseCases = [
   CreateUserUseCase,
@@ -112,7 +115,7 @@ const pairUseCases = [ConnectUserToPairUseCase, SendAnswerUseCase];
 
 const playerUseCases = [CreatePlayerUseCase];
 
-const answerUseCases = [CreateAnswerUseCase];
+const answerUseCases = [CreateAnswerUseCase, FillMissingAnswersUseCase];
 
 const gameUseCases = [
   CreateGameUseCase,
@@ -129,6 +132,7 @@ const gameUseCases = [
     UserModule,
     CqrsModule,
     JwtModule,
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
         return {
@@ -216,6 +220,7 @@ const gameUseCases = [
       useClass: ThrottlerGuard,
     },
     AppService,
+    GameTimeoutCronService,
     UsersRepository,
     UsersQueryRepository,
     TestingRepository,

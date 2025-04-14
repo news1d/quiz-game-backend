@@ -13,6 +13,7 @@ import { GameStatus } from '../src/features/quiz-game/games/enums/game-status';
 import { GamesTestManager } from './helpers/games-test-manager';
 import { AnswerStatus } from '../src/features/quiz-game/answers/enums/answer-status';
 import { GamePairViewDto } from '../src/features/quiz-game/games/api/view-dto/game-pair.view-dto';
+import { delay } from './helpers/delay';
 
 describe('games', () => {
   let app: INestApplication;
@@ -894,5 +895,39 @@ describe('games', () => {
         },
       },
     ]);
+  });
+
+  it('should finish game if user afk 10 sec after other user has answered all questions', async () => {
+    await questionsTestManager.createSeveralPublishedQuestions(7);
+    const users = await usersTestManager.createSeveralUsers(3);
+
+    const accessTokens = await Promise.all(
+      users.map((user) => usersTestManager.login(user.login, '123456789')),
+    );
+
+    const startedGame = await gamesTestManager.startGame(
+      accessTokens[0].accessToken,
+      accessTokens[1].accessToken,
+    );
+
+    // Отвечаем все вопросы первым пользователем
+    for (let i = 0; i < 5; i++) {
+      await gamesTestManager.sendAnswer(
+        'correctAnswer',
+        accessTokens[0].accessToken,
+      );
+    }
+
+    // Ждем 10 секунд
+    await delay(12000);
+
+    const { body: finishedGame } = await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/${startedGame.id}`)
+      .auth(accessTokens[0].accessToken, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    expect(finishedGame.status).toBe(GameStatus.Finished);
+    expect(finishedGame.firstPlayerProgress.score).toBe(6);
+    expect(finishedGame.secondPlayerProgress.score).toBe(0);
   });
 });

@@ -60,6 +60,17 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
       game.id.toString(),
     );
 
+    // Проверяем, завершил ли текущий игрок все ответы
+    const currentPlayerAnswers =
+      updatedGame.firstPlayer.userId === +userId
+        ? updatedGame.firstPlayer.answers
+        : updatedGame.secondPlayer!.answers;
+
+    if (currentPlayerAnswers.length === 5) {
+      updatedGame.markPlayerCompleted(userId);
+      await this.gamesRepository.save(updatedGame);
+    }
+
     // Если оба игрока ответили на все вопросы - то игра должна окончиться
     const isGameFinished =
       updatedGame.firstPlayer.answers.length === 5 &&

@@ -110,6 +110,25 @@ export class GamesRepository {
     }
   }
 
+  async getAllActiveGames(): Promise<Game[]> {
+    return await this.gamesRepository.find({
+      where: {
+        status: GameStatus.Active,
+      },
+      relations: {
+        questions: {
+          question: true,
+        },
+        firstPlayer: {
+          answers: true,
+        },
+        secondPlayer: {
+          answers: true,
+        },
+      },
+    });
+  }
+
   async save(game: Game): Promise<Game> {
     return this.gamesRepository.save(game);
   }
