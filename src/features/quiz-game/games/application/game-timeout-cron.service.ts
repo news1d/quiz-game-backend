@@ -65,7 +65,7 @@ export class GameTimeoutCronService {
 
         const timeSinceFinished = now.getTime() - playerFinishedAt.getTime();
 
-        if (timeSinceFinished < 10_000) continue;
+        if (timeSinceFinished < 9_500) continue;
 
         for (const player of [game.firstPlayer, game.secondPlayer!]) {
           const answeredIds = player.answers.map((a) => a.questionId);
@@ -110,7 +110,6 @@ export class GameTimeoutCronService {
 
         await queryRunner.manager.getRepository(Game).save(updatedGame);
       }
-
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();

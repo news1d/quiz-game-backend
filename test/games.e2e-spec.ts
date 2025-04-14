@@ -919,7 +919,7 @@ describe('games', () => {
     }
 
     // Ждем 10 секунд
-    await delay(12000);
+    await delay(10000);
 
     const { body: finishedGame } = await request(app.getHttpServer())
       .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/${startedGame.id}`)
